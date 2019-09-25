@@ -5,10 +5,11 @@
   "dependencies": {
     "moment": "^2.24.0",
     "react": "^16.9.0",
-    "react-dom": "^16.9.0",
-    "react-scripts": "0.9.5"
+    "react-dom": "^16.9.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "react-scripts": "^3.1.2"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
