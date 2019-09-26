@@ -1,40 +1,52 @@
 import React, { Component } from 'react';
+import * as moment from 'moment';
 import './App.css';
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      totalDuration: 0,
-      basicDuration: 0,
+      totalDuration: 1,
+      basicDuration: 1,
       overtimeDuration: 0,
-      limit: 0,
-      basicRate: 0,
-      overtimeRate: 0,
-      basicPay: 0,
+      limit: 1,
+      basicRate: 1,
+      overtimeRate: 1,
+      basicPay: 1,
       overtimePay: 0,
-      totalPay: 0,
+      totalPay: 1,
+      start: moment().format('LLL'),
+      end: moment().add(8, 'hour').format('LLL'),
+      startDisplay: 'hello',
+      endDisplay: 'hello',
+      errors: {
+        totalDuration: ' ',
+        limit: ' ',
+        basicRate: ' ',
+        overtimeRate: ' ',
+      }
     }
     this.handleDurationChange = this.handleDurationChange.bind(this);
     this.handleRateChange = this.handleRateChange.bind(this);
+    this.handleErrorCheck = this.handleErrorCheck.bind(this);
+    // this.handleTimeChange = this.handleTimeChange.bind(this);
     this.calculatePay = this.calculatePay.bind(this);
   }
 
   //handle pay rate related changes
   handleRateChange(event) {
-    const target = event.target;
-    const name = target.name;
-    const value = target.value;
+    const { name, value } = event.target;
+    this.handleErrorCheck(name, value);
     this.setState({ [name]: value }, this.calculatePay);
   }
 
   //handle duration related changes
   handleDurationChange(event) {
-    const target = event.target;
-    const name = target.name;
-    const value = target.value;
+    const { name, value } = event.target;
     var overtime = 0;
     var basic = 0;
+    this.handleErrorCheck(name, value);
+
     if (name === 'totalDuration') {
       if (Number(value) < this.state.limit) {
         basic = Number(value);
@@ -52,7 +64,6 @@ class App extends Component {
         overtime = this.state.totalDuration - Number(value);
       }
     }
-    console.log("basic " + basic + " overtime " + overtime);
 
     this.setState({
       [name]: value,
@@ -61,8 +72,39 @@ class App extends Component {
     }, this.calculatePay);
   }
 
+  handleErrorCheck(name, value) {
+    let errors = this.state.errors;
+    switch (name) {
+      case 'totalDuration':
+        errors.totalDuration =
+          (isNaN(value) || value === '')
+            ? 'Invalid Number'
+            : [value < 1 ? 'Number must be more than zero!' : ''];
+        break;
+      case 'limit':
+        errors.limit =
+          (isNaN(value) || value === '')
+            ? 'Invalid Number'
+            : [value < 1 ? 'Number must be more than zero!' : ''];
+        break;
+      case 'basicRate':
+        errors.basicRate =
+          (isNaN(value) || value === '')
+            ? 'Invalid Number'
+            : [value < 1 ? 'Number must be more than zero!' : ''];
+        break;
+      case 'overtimeRate':
+        errors.overtimeRate =
+          (isNaN(value) || value === '')
+            ? 'Invalid Number'
+            : [value < 1 ? 'Number must be more than zero!' : ''];
+        break;
+      default:
+        break;
+    }
+  }
+
   calculatePay() {
-    console.log("basic " + this.state.basicDuration + " overtime " + this.state.overtimeDuration + " total " + this.state.totalDuration);
     var basic = Number(this.state.basicDuration) * Number(this.state.basicRate);
     var overtime = Number(this.state.overtimeDuration) * Number(this.state.overtimeRate);
     var result = basic + overtime;
@@ -74,38 +116,59 @@ class App extends Component {
   }
 
   render() {
-    const invalidInput = <p className="invalid">Invalid Number</p>;
-    const zero = <p className="invalid">Number must be more than zero</p>;
+    // const invalidTime = <span className="invalid">Invalid Time</span>;
     const {
-      totalDuration, basicDuration, overtimeDuration, limit, basicRate, overtimeRate, basicPay, overtimePay, totalPay
+      totalDuration,
+      basicDuration,
+      overtimeDuration,
+      limit,
+      basicRate,
+      overtimeRate,
+      basicPay,
+      overtimePay,
+      totalPay,
+      startDisplay,
+      endDisplay,
+      errors
     } = this.state;
 
     return (
-      <div className="body">
+      <div>
         <div className="App-header">
-          <h2>Pay Calculation Form</h2>
+          <h1>Pay Calculation Form</h1>
         </div>
-        <form className="form">
+        <form>
+          {/* <p>Enter start and end time in the following format: 0000</p>
+          <label>
+            Start Time
+            <input type="text" name="startDisplay" value={startDisplay} onChange={this.handleDurationChange} className="input" />
+          </label>
+          <div>{(isNaN(startDisplay) || startDisplay === '') ? invalidTime : [startDisplay > 0 ? startDisplay : zero]}</div>
+          <label>
+            End Time
+            <input type="text" name="endDisplay" value={endDisplay} onChange={this.handleDurationChange} className="input" />
+          </label>
+          <div>{(isNaN(endDisplay) || endDisplay === '') ? invalidTime : [endDisplay > 0 ? endDisplay : zero]}</div> */}
           <label>
             Shift Duration
-            <input type="text" name="totalDuration" value={totalDuration} onChange={this.handleDurationChange} className="input" />
+            <input type="text" name="totalDuration" value={totalDuration} onChange={this.handleDurationChange} />
           </label>
-          <div>{(isNaN(totalDuration) || totalDuration === '') ? invalidInput : [totalDuration > 0 ? totalDuration : zero]}</div>
+          <div>{errors.totalDuration.length > 0 && <span className='invalid'>{errors.totalDuration}</span>}</div>
           <label>
             Overtime Hour Limit
-            <input type="text" name="limit" value={limit} onChange={this.handleDurationChange} className="input" />
+            <input type="text" name="limit" value={limit} onChange={this.handleDurationChange} />
           </label>
-          <div>{(isNaN(limit) || limit === '') ? invalidInput : [limit > 0 ? limit : zero]}</div>
+          <div>{errors.limit.length > 0 && <span className='invalid'>{errors.limit}</span>}</div>
           <label>
             Basic Pay Rate
-            <input type="text" name="basicRate" value={basicRate} onChange={this.handleRateChange} className="input" />
+            <input type="text" name="basicRate" value={basicRate} onChange={this.handleRateChange} />
           </label>
-          <div>{(isNaN(basicRate) || basicRate === '') ? invalidInput : [basicRate > 0 ? basicRate : zero]}</div>
+          <div>{errors.basicRate.length > 0 && <span className='invalid'>{errors.basicRate}</span>}</div>
           <label>
             Overtime Pay Rate
-            <input type="text" name="overtimeRate" value={overtimeRate} onChange={this.handleRateChange} className="input" />
+            <input type="text" name="overtimeRate" value={overtimeRate} onChange={this.handleRateChange} />
           </label>
-          <div>{(isNaN(overtimeRate) || overtimeRate === '') ? invalidInput : [overtimeRate > 0 ? overtimeRate : zero]}</div>
+          <div>{errors.overtimeRate.length > 0 && <span className='invalid'>{errors.overtimeRate}</span>}</div>
         </form>
 
         <div className="texts">
